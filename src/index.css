@@ -1,0 +1,35 @@
+:root {
+  --primary-bg: #181f2a;
+  --primary: #2563eb;
+  --primary-light: #3b82f6;
+  --secondary: #fbbf24;
+  --accent: #10b981;
+  --danger: #ef4444;
+  --surface: #232b3b;
+  --surface-light: #2d3748;
+  --border: #334155;
+  --text: #f1f5f9;
+  --text-light: #cbd5e1;
+  --card-bg: #232b3b;
+  --input-bg: #1e293b;
+  --input-border: #334155;
+  --input-focus: #2563eb;
+  --shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+}
+
+body {
+  margin: 0;
+  font-family: "Inter", "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell",
+    "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  background: var(--primary-bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+  transition: background 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
+}

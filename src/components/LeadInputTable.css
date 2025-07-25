@@ -1,0 +1,107 @@
+.lead-input-table {
+  margin: 2.5rem 0;
+  background: var(--card-bg);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  padding: 2rem 2.5rem;
+  animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.table-controls {
+  display: flex;
+  gap: 1.2rem;
+  margin-bottom: 1.2rem;
+}
+/* Custom file input styling */
+.file-upload {
+  position: relative;
+  display: inline-block;
+}
+.file-upload input[type="file"] {
+  opacity: 0;
+  width: 0.1px;
+  height: 0.1px;
+  position: absolute;
+  z-index: -1;
+}
+.file-upload-label {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  padding: 0.45rem 1.2rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.08);
+  display: inline-block;
+}
+.file-upload-label:hover,
+.file-upload-label:focus {
+  background: var(--primary-light);
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.15);
+}
+.file-upload input[type="file"]:focus + .file-upload-label {
+  outline: 2px solid var(--primary-light);
+  outline-offset: 2px;
+}
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+th,
+td {
+  padding: 0.7rem 1rem;
+  border-bottom: 1px solid var(--border);
+}
+th {
+  background: var(--surface-light);
+  text-align: left;
+  color: var(--primary-light);
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+input,
+select {
+  width: 100%;
+  padding: 0.45rem 0.7rem;
+  border: 1.5px solid var(--input-border);
+  border-radius: 6px;
+  font-size: 1rem;
+  background: var(--input-bg);
+  color: var(--text);
+  transition: border 0.2s, box-shadow 0.2s;
+  outline: none;
+}
+input:focus,
+select:focus {
+  border: 1.5px solid var(--input-focus);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
+}
+button {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  padding: 0.45rem 1.2rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.08);
+}
+button:disabled {
+  background: var(--border);
+  cursor: not-allowed;
+}

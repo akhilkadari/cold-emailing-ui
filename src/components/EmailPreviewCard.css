@@ -1,0 +1,86 @@
+.email-preview-card {
+  background: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+  min-width: 320px;
+  max-width: 400px;
+  flex: 1 1 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  position: relative;
+  animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.email-preview-card.discarded {
+  opacity: 0.5;
+  background: rgba(239, 68, 68, 0.12);
+}
+.email-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1rem;
+  font-weight: 500;
+}
+.email-fields label {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+.email-fields input,
+.email-fields textarea {
+  width: 100%;
+  margin-top: 0.2rem;
+  padding: 0.45rem 0.7rem;
+  border: 1.5px solid var(--input-border);
+  border-radius: 6px;
+  font-size: 1rem;
+  background: var(--input-bg);
+  color: var(--text);
+  transition: border 0.2s, box-shadow 0.2s;
+  outline: none;
+}
+.email-fields input:focus,
+.email-fields textarea:focus {
+  border: 1.5px solid var(--input-focus);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
+}
+.linkedin-highlights {
+  background: var(--surface-light);
+  border-radius: 4px;
+  padding: 0.5rem;
+  margin-top: 0.5rem;
+  font-size: 0.95rem;
+  color: var(--primary-light);
+}
+.email-actions {
+  display: flex;
+  gap: 0.7rem;
+  justify-content: flex-end;
+}
+.email-actions button {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  padding: 0.4rem 1.1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.08);
+}
+.email-actions button:disabled {
+  background: var(--border);
+  cursor: not-allowed;
+}
