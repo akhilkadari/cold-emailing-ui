@@ -58,22 +58,16 @@ const EmailPreviewCard = ({ email, onChange, onDiscard }) => {
             placeholder="Email content..."
           />
         </div>
-
-        {email.linkedinHighlights && (
-          <div className="linkedin-highlights">
-            <div className="linkedin-title">LinkedIn Profile Data</div>
-            <div className="linkedin-info">
-              <div>
-                <strong>Company:</strong>{" "}
-                {email.linkedinHighlights.company || "Not specified"}
-              </div>
-              <div>
-                <strong>Job Title:</strong>{" "}
-                {email.linkedinHighlights.job_title || "Not specified"}
-              </div>
-            </div>
-          </div>
-        )}
+        <div className="field-group">
+          <label className="field-label">Signature</label>
+          <textarea
+            rows={6}
+            value={editing ? local.signature : email.signature}
+            onChange={(e) => setLocal({ ...local, signature: e.target.value })}
+            disabled={!editing}
+            placeholder="Email content..."
+          />
+        </div>
       </div>
 
       <div className="email-actions">

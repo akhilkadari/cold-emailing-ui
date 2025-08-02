@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import "./LeadInputTable.css";
 
 // ============================================================================
@@ -16,7 +16,12 @@ I hope your week is going well! My name is Akhil Kadari, and I am a sophomore at
 If you are available, I would appreciate the opportunity to talk about your experience in {{company}} and any general advice you may have. My schedule for this week and next is flexible, so I am happy to work around you when scheduling a 10‑15‑minute call. I have also attached my resume for your reference. Thank you in advance for your time. I look forward to speaking with you. 
   
 Best regards, 
-Akhil Kadari `,
+Akhil Kadari`,
+];
+
+const defaultEmailSignatures = [
+  "Best regards,\nAkhil Kadari\nMichigan State University\nCollege of Engineering\nLinkedIn | +1 (248) 590-1059",
+  "Best, \n Akhil Kadari",
 ];
 
 // ============================================================================
@@ -26,10 +31,23 @@ const LeadInputTable = ({
   leads,
   setLeads,
   templates = defaultTemplates,
+  emailSignatures = defaultEmailSignatures,
   saveLeads,
   deleteLead,
   loading = false,
 }) => {
+  // ============================================================================
+  // STATE
+  // ============================================================================
+  const [customTemplates, setCustomTemplates] = useState([]);
+  const [customSignatures, setCustomSignatures] = useState([]);
+  const [modalState, setModalState] = useState({
+    isOpen: false,
+    type: null, // 'template' or 'signature'
+    leadIndex: null,
+    content: "",
+  });
+
   // ============================================================================
   // EVENT HANDLERS
   // ============================================================================
@@ -44,6 +62,72 @@ const LeadInputTable = ({
   };
 
   /**
+   * Handle template/signature selection
+   */
+  const handleTemplateOrSignatureChange = (idx, field, value) => {
+    if (value === "CUSTOM") {
+      // Open modal for custom input
+      setModalState({
+        isOpen: true,
+        type: field === "template" ? "template" : "signature",
+        leadIndex: idx,
+        content: "",
+      });
+    } else {
+      handleChange(idx, field, value);
+    }
+  };
+
+  /**
+   * Handle modal content change
+   */
+  const handleModalContentChange = (content) => {
+    setModalState((prev) => ({ ...prev, content }));
+  };
+
+  /**
+   * Save custom template/signature
+   */
+  const saveCustomContent = () => {
+    const { type, leadIndex, content } = modalState;
+
+    if (!content.trim()) {
+      alert("Please enter some content before saving.");
+      return;
+    }
+
+    if (type === "template") {
+      const newCustomTemplates = [...customTemplates, content];
+      setCustomTemplates(newCustomTemplates);
+      handleChange(leadIndex, "template", content);
+    } else {
+      const newCustomSignatures = [...customSignatures, content];
+      setCustomSignatures(newCustomSignatures);
+      handleChange(leadIndex, "emailSignature", content);
+    }
+
+    // Close modal
+    setModalState({
+      isOpen: false,
+      type: null,
+      leadIndex: null,
+      content: "",
+    });
+  };
+
+  /**
+   * Close modal without saving
+   */
+  const closeModal = () => {
+    setModalState({
+      isOpen: false,
+      type: null,
+      leadIndex: null,
+      content: "",
+    });
+  };
+
+  /**
    * Add a new empty lead row
    */
   const addRow = () => {
@@ -53,6 +137,7 @@ const LeadInputTable = ({
       lastname: "",
       linkedin: "",
       template: "", // Default to empty
+      emailSignature: "",
     };
     setLeads([...leads, newLead]);
   };
@@ -79,6 +164,7 @@ const LeadInputTable = ({
           lastname: "",
           linkedin: "",
           template: "",
+          emailSignature: "",
         },
       ]);
     } else {
@@ -103,10 +189,10 @@ const LeadInputTable = ({
   };
 
   /**
-   * Handle CSV file upload (placeholder)
+   * Handle Resume file upload (placeholder)
    */
   const handleFileUpload = (e) => {
-    alert("CSV import not implemented yet.");
+    alert("Resume import not implemented yet.");
   };
 
   // ============================================================================
@@ -121,8 +207,19 @@ const LeadInputTable = ({
       lead.firstname ||
       lead.lastname ||
       lead.linkedin ||
-      lead.template
+      lead.template ||
+      lead.emailSignature
   );
+
+  /**
+   * Get all available templates (default + custom)
+   */
+  const getAllTemplates = () => [...templates, ...customTemplates];
+
+  /**
+   * Get all available signatures (default + custom)
+   */
+  const getAllSignatures = () => [...emailSignatures, ...customSignatures];
 
   // ============================================================================
   // RENDER
@@ -136,14 +233,14 @@ const LeadInputTable = ({
         </button>
         <div className="file-upload">
           <input
-            id="csv-upload"
+            id="resume-upload"
             type="file"
-            accept=".csv"
+            accept=".pdf"
             onChange={handleFileUpload}
             disabled={loading}
           />
-          <label htmlFor="csv-upload" className="file-upload-label">
-            Choose CSV File
+          <label htmlFor="resume-upload" className="file-upload-label">
+            Add Resume File
           </label>
         </div>
       </div>
@@ -159,7 +256,8 @@ const LeadInputTable = ({
             <th>First Name</th>
             <th>Last Name</th>
             <th>LinkedIn</th>
-            <th>Template</th>
+            <th>Template *</th>
+            <th>Signature *</th>
             <th>Remove</th>
           </tr>
         </thead>
@@ -213,18 +311,48 @@ const LeadInputTable = ({
               {/* Template selection */}
               <td>
                 <select
+                  required
                   value={lead.template || ""}
                   onChange={(e) =>
-                    handleChange(idx, "template", e.target.value)
+                    handleTemplateOrSignatureChange(
+                      idx,
+                      "template",
+                      e.target.value
+                    )
                   }
                   disabled={loading}
                 >
                   <option value="">Select a template...</option>
-                  {templates.map((tpl, i) => (
+                  {getAllTemplates().map((tpl, i) => (
                     <option key={i} value={tpl}>
-                      {tpl.slice(0, 30)}...
+                      {tpl.slice(0, 50)}...
                     </option>
                   ))}
+                  <option value="CUSTOM">+ Create Custom Template</option>
+                </select>
+              </td>
+
+              {/* Email signature selection */}
+              <td className="signature-column">
+                <select
+                  required
+                  value={lead.emailSignature || ""}
+                  onChange={(e) =>
+                    handleTemplateOrSignatureChange(
+                      idx,
+                      "emailSignature",
+                      e.target.value
+                    )
+                  }
+                  disabled={loading}
+                >
+                  <option value="">Select a signature...</option>
+                  {getAllSignatures().map((sig, i) => (
+                    <option key={i} value={sig}>
+                      {sig.slice(0, 50)}...
+                    </option>
+                  ))}
+                  <option value="CUSTOM">+ Create Custom Signature</option>
                 </select>
               </td>
 
@@ -255,6 +383,58 @@ const LeadInputTable = ({
           {loading ? "Saving..." : "Save"}
         </button>
       </div>
+
+      {/* Custom Content Modal */}
+      {modalState.isOpen && (
+        <div className="modal-overlay" onClick={closeModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>
+                Create Custom{" "}
+                {modalState.type === "template"
+                  ? "Email Template"
+                  : "Email Signature"}
+              </h3>
+              <button className="modal-close" onClick={closeModal}>
+                ×
+              </button>
+            </div>
+            <div className="modal-body">
+              <textarea
+                value={modalState.content}
+                onChange={(e) => handleModalContentChange(e.target.value)}
+                placeholder={
+                  modalState.type === "template"
+                    ? "Enter your custom email template here. You can use placeholders like {{firstname}}, {{lastname}}, {{company}}, etc."
+                    : "Enter your custom email signature here."
+                }
+                rows={10}
+                autoFocus
+              />
+              {modalState.type === "template" && (
+                <div className="template-help">
+                  <p>
+                    <strong>Available placeholders:</strong>
+                  </p>
+                  <p>
+                    {
+                      "{{firstname}}, {{lastname}}, {{company}}, {{role}}, {{job_title}}"
+                    }
+                  </p>
+                </div>
+              )}
+            </div>
+            <div className="modal-footer">
+              <button onClick={closeModal} className="btn-secondary">
+                Cancel
+              </button>
+              <button onClick={saveCustomContent} className="btn-primary">
+                Save {modalState.type === "template" ? "Template" : "Signature"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

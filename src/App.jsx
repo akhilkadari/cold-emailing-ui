@@ -19,6 +19,7 @@ const defaultLead = {
   lastname: "",
   linkedin: "",
   template: "",
+  emailSignature: "",
 };
 
 function App() {
@@ -112,6 +113,7 @@ function App() {
           lastname: lead.lastname || "",
           linkedin: lead.linkedin || "",
           template: lead.template || "",
+          emailSignature: lead.emailSignature || "",
         }));
         setLeads(mappedLeads);
       } else {
@@ -142,7 +144,9 @@ function App() {
             lead.firstname ||
             lead.lastname ||
             lead.linkedin ||
-            lead.template)
+            lead.template ||
+            lead.emailSignature ||
+            lead.resume)
       );
       const existingLeads = updatedLeads.filter((lead) => lead.id);
 
@@ -156,6 +160,7 @@ function App() {
             lastname: lead.lastname || null,
             linkedin: lead.linkedin || null,
             template: lead.template || null,
+            emailSignature: lead.emailSignature || null,
           }))
         );
 
@@ -173,6 +178,7 @@ function App() {
               lastname: lead.lastname || null,
               linkedin: lead.linkedin || null,
               template: lead.template || null,
+              emailSignature: lead.emailSignature || null,
             })
             .eq("id", lead.id)
             .eq("user_id", session.user.id);
@@ -250,6 +256,7 @@ function App() {
             lastname: payload.new.lastname || "",
             linkedin: payload.new.linkedin || "",
             template: payload.new.template || "",
+            emailSignature: payload.new.emailSignature || "",
           };
           return [...current, newLead];
         });
@@ -266,6 +273,7 @@ function App() {
                   lastname: payload.new.lastname || "",
                   linkedin: payload.new.linkedin || "",
                   template: payload.new.template || "",
+                  emailSignature: payload.new.emailSignature || "",
                 }
               : lead
           )
@@ -286,6 +294,7 @@ function App() {
   /**
    * Generate emails using n8n workflow
    */
+
   const handleGenerate = async () => {
     setGenLoading(true);
     setGenError(undefined);
@@ -293,7 +302,7 @@ function App() {
 
     try {
       const response = await fetch(
-        "https://akhilkadari.app.n8n.cloud/webhook-test/generate-emails",
+        "https://akhilkadari.app.n8n.cloud/webhook/generate-emails",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -306,11 +315,6 @@ function App() {
 
       if (!response.ok) throw new Error("Failed to trigger workflow");
       const data = await response.json();
-      console.log("n8n response:", data);
-      console.log(
-        "n8n response length/type:",
-        Array.isArray(data) ? data.length : typeof data
-      );
 
       // Handle object response format
       let emailsArray;
@@ -324,14 +328,10 @@ function App() {
         throw new Error("Unexpected response format from n8n");
       }
 
-      console.log("emailsArray:", emailsArray);
-      console.log("emailsArray length:", emailsArray.length);
-
       // Map the n8n response format to your UI format
       const mappedEmails = emailsArray.map((emailData) => {
         // Debug: Log individual email data to see the structure
-        console.log("Individual emailData:", emailData);
-
+        console.log("emailData:", emailData);
         return {
           email: emailData.emailId || emailData.recipient_email || "",
           firstname:
@@ -346,6 +346,7 @@ function App() {
             "",
           subject: emailData.subject || "",
           body: emailData.body || emailData.content || "",
+          signature: emailData.signature || "",
           discarded: false,
         };
       });
@@ -369,9 +370,11 @@ function App() {
     setSendError(undefined);
     setSendSuccess(false);
 
+    console.log("emails:", emails);
+
     try {
       const response = await fetch(
-        "https://akhilkadari.app.n8n.cloud/webhook-test/send-email",
+        "https://akhilkadari.app.n8n.cloud/webhook/send-email",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -461,7 +464,7 @@ function App() {
 
       <main
         style={{
-          maxWidth: 900,
+          maxWidth: 1400,
           margin: "0 auto",
           padding: "2rem 1rem 4rem 1rem",
         }}
@@ -485,11 +488,7 @@ function App() {
         {/* Email preview and sending */}
         {emails.length > 0 && (
           <>
-            <EmailPreviewSection
-              emails={emails}
-              onUpdate={handleUpdateEmail}
-              onDiscard={handleDiscardEmail}
-            />
+            <EmailPreviewSection emails={emails} onUpdate={handleUpdateEmail} />
             <SendButton
               count={emails.filter((e) => !e.discarded).length}
               onClick={handleSendEmail}

@@ -121,12 +121,17 @@
   outline: none;
   line-height: 1.5;
   box-sizing: border-box;
+}
+
+.email-fields input {
   overflow: hidden;
 }
 .email-fields textarea {
   resize: vertical;
   min-height: 120px;
+  max-height: 400px;
   font-family: inherit;
+  overflow-y: auto;
 }
 .email-fields input:focus,
 .email-fields textarea:focus {
