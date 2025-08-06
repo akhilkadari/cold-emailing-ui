@@ -56,25 +56,6 @@
   max-width: 220px;
 }
 
-.error-toast {
-  position: absolute;
-  top: 5rem;
-  right: 2.5rem;
-  background: #ef4444;
-  color: #fff;
-  padding: 0.8rem 2rem;
-  border-radius: 8px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  box-shadow: 0 4px 24px rgba(239, 68, 68, 0.15);
-  z-index: 10;
-  opacity: 0;
-  transform: translateY(-20px);
-  animation: fadeInOut 4s cubic-bezier(0.4, 0, 0.2, 1);
-  text-align: center;
-  max-width: 300px;
-}
-
 @keyframes fadeInOut {
   0% {
     opacity: 0;

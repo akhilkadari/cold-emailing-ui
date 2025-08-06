@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { supabase } from "../supabaseClient"; // Add this import
 import "./LeadInputTable.css";
 
 // ============================================================================
@@ -35,6 +36,14 @@ const LeadInputTable = ({
   saveLeads,
   deleteLead,
   loading = false,
+  resumeFile,
+  setResumeFile,
+  resumeFileName,
+  setResumeFileName,
+  resumeUrl,
+  setResumeUrl,
+  session,
+  saveResumeToSettings, // Add this prop
 }) => {
   // ============================================================================
   // STATE
@@ -189,10 +198,44 @@ const LeadInputTable = ({
   };
 
   /**
-   * Handle Resume file upload (placeholder)
+   * Handle Resume file upload
    */
-  const handleFileUpload = (e) => {
-    alert("Resume import not implemented yet.");
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      // Use the original filename instead of generating a unique one
+      const filePath = `${session?.user?.id}/${file.name}`;
+
+      // Upload to Supabase Storage
+      const { data: uploadData, error: uploadError } = await supabase.storage // Fix variable naming
+        .from("resumes")
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const {
+        data: { publicUrl },
+      } = supabase.storage // Fix this line
+        .from("resumes")
+        .getPublicUrl(filePath);
+
+      // Update local state
+      setResumeFile(file);
+      setResumeFileName(file.name);
+      setResumeUrl(publicUrl);
+
+      // Save to database
+      await saveResumeToSettings(publicUrl, file.name);
+
+      // Clear the input
+      e.target.value = "";
+    } catch (error) {
+      console.error("Error uploading resume:", error);
+      alert("Failed to upload resume. Please try again.");
+    }
   };
 
   // ============================================================================
@@ -244,6 +287,54 @@ const LeadInputTable = ({
           </label>
         </div>
       </div>
+
+      {/* Resume file display */}
+      {resumeFileName && (
+        <div className="resume-display-section">
+          <div className="resume-file-info">
+            <span className="resume-icon">📄</span>
+            <span className="resume-name">{resumeFileName}</span>
+            <button
+              className="remove-resume-btn"
+              onClick={async () => {
+                try {
+                  const response = await fetch(
+                    "https://akhilkadari.app.n8n.cloud/webhook/delete-resume",
+                    {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify({
+                        resumeUrl,
+                      }),
+                    }
+                  );
+
+                  if (!response.ok) {
+                    throw new Error("Failed to delete resume");
+                  }
+                  const result = await response.json();
+
+                  // Clear from database
+                  await saveResumeToSettings("", "");
+
+                  // Clear local state
+                  setResumeFile(null);
+                  setResumeFileName("");
+                  setResumeUrl("");
+                } catch (error) {
+                  console.error("Error deleting resume:", error);
+                  alert("Failed to delete resume. Please try again.");
+                }
+              }}
+              disabled={loading}
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Loading indicator */}
       {loading && <div className="loading-indicator">Loading leads...</div>}

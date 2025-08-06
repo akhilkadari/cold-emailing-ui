@@ -27,8 +27,6 @@ function App() {
   // STATE MANAGEMENT
   // ============================================================================
   // Authentication state
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState();
   const [session, setSession] = useState(null);
 
   // Leads management state
@@ -46,6 +44,11 @@ function App() {
 
   // UI state
   const [showSaved, setShowSaved] = useState(false);
+
+  // Resume file upload state
+  const [resumeFile, setResumeFile] = useState(null);
+  const [resumeFileName, setResumeFileName] = useState("");
+  const [resumeUrl, setResumeUrl] = useState("");
 
   // ============================================================================
   // AUTHENTICATION EFFECTS & HANDLERS
@@ -68,20 +71,12 @@ function App() {
   useEffect(() => {
     if (session?.user?.id) {
       loadLeads();
-      setupRealtimeSubscription();
     }
   }, [session]);
-
-  const handleLogin = () => {
-    setIsLoggedIn(true);
-    setUser({ name: "John Doe", email: "john@example.com" });
-  };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setSession(null);
-    setIsLoggedIn(false);
-    setUser(undefined);
     setLeads([{ ...defaultLead }]); // Reset to default lead
   };
 
@@ -145,8 +140,7 @@ function App() {
             lead.lastname ||
             lead.linkedin ||
             lead.template ||
-            lead.emailSignature ||
-            lead.resume)
+            lead.emailSignature)
       );
       const existingLeads = updatedLeads.filter((lead) => lead.id);
 
@@ -216,75 +210,47 @@ function App() {
   };
 
   // ============================================================================
-  // REAL-TIME SUBSCRIPTION HANDLING
+  // USER SETTINGS OPERATIONS
   // ============================================================================
   /**
-   * Setup real-time subscription for leads changes
+   * Save resume URL to user settings
    */
-  const setupRealtimeSubscription = () => {
-    const subscription = supabase
-      .channel("leads_changes")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "leads",
-          filter: `user_id=eq.${session.user.id}`,
-        },
-        handleRealtimeChange
-      )
-      .subscribe();
+  const saveResumeToSettings = async (resumeUrl, resumeFileName) => {
+    if (!session?.user?.id) return;
 
-    // Cleanup subscription on unmount
-    return () => subscription.unsubscribe();
-  };
+    try {
+      // First check if record exists
+      const { data: existingData } = await supabase
+        .from("user_settings")
+        .select("id")
+        .eq("user_id", session.user.id)
+        .single();
 
-  /**
-   * Handle real-time database changes
-   */
-  const handleRealtimeChange = (payload) => {
-    console.log("Real-time change:", payload);
+      if (existingData) {
+        // Update existing record
+        const { error } = await supabase
+          .from("user_settings")
+          .update({
+            resume_url: resumeUrl,
+            resume_filename: resumeFileName,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("user_id", session.user.id);
 
-    switch (payload.eventType) {
-      case "INSERT":
-        setLeads((current) => {
-          const newLead = {
-            id: payload.new.id,
-            email: payload.new.email || "",
-            firstname: payload.new.firstname || "",
-            lastname: payload.new.lastname || "",
-            linkedin: payload.new.linkedin || "",
-            template: payload.new.template || "",
-            emailSignature: payload.new.emailSignature || "",
-          };
-          return [...current, newLead];
+        if (error) throw error;
+      } else {
+        // Insert new record
+        const { error } = await supabase.from("user_settings").insert({
+          user_id: session.user.id,
+          resume_url: resumeUrl,
+          resume_filename: resumeFileName,
         });
-        break;
 
-      case "UPDATE":
-        setLeads((current) =>
-          current.map((lead) =>
-            lead.id === payload.new.id
-              ? {
-                  id: payload.new.id,
-                  email: payload.new.email || "",
-                  firstname: payload.new.firstname || "",
-                  lastname: payload.new.lastname || "",
-                  linkedin: payload.new.linkedin || "",
-                  template: payload.new.template || "",
-                  emailSignature: payload.new.emailSignature || "",
-                }
-              : lead
-          )
-        );
-        break;
-
-      case "DELETE":
-        setLeads((current) =>
-          current.filter((lead) => lead.id !== payload.old.id)
-        );
-        break;
+        if (error) throw error;
+      }
+    } catch (error) {
+      console.error("Error saving resume settings:", error);
+      throw error;
     }
   };
 
@@ -309,6 +275,7 @@ function App() {
           body: JSON.stringify({
             leads,
             userEmail: session?.user?.email,
+            resumeUrl, // Add this line
           }),
         }
       );
@@ -330,8 +297,6 @@ function App() {
 
       // Map the n8n response format to your UI format
       const mappedEmails = emailsArray.map((emailData) => {
-        // Debug: Log individual email data to see the structure
-        console.log("emailData:", emailData);
         return {
           email: emailData.emailId || emailData.recipient_email || "",
           firstname:
@@ -351,9 +316,6 @@ function App() {
         };
       });
 
-      console.log("mappedEmails:", mappedEmails);
-      console.log("mappedEmails length:", mappedEmails.length);
-
       setEmails(mappedEmails);
       setGenLoading(false);
     } catch (e) {
@@ -370,16 +332,15 @@ function App() {
     setSendError(undefined);
     setSendSuccess(false);
 
-    console.log("emails:", emails);
-
     try {
       const response = await fetch(
-        "https://akhilkadari.app.n8n.cloud/webhook/send-email",
+        "https://akhilkadari.app.n8n.cloud/webhook-test/send-email",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             emails,
+            userEmail: session?.user?.email,
           }),
         }
       );
@@ -387,11 +348,6 @@ function App() {
       if (!response.ok) throw new Error("Failed to send emails");
 
       const result = await response.json();
-      console.log("n8n response:", result);
-      console.log(
-        "n8n response length/type:",
-        Array.isArray(result) ? result.length : typeof result
-      );
       setSendSuccess(true);
     } catch (e) {
       setSendError(e.message || "Failed to send emails.");
@@ -454,7 +410,6 @@ function App() {
       <Header
         isLoggedIn={!!session}
         user={session?.user}
-        onLogin={handleLogin}
         onLogout={handleLogout}
       />
 
@@ -476,6 +431,14 @@ function App() {
           saveLeads={saveLeads}
           deleteLead={deleteLead}
           loading={leadsLoading}
+          resumeFile={resumeFile}
+          setResumeFile={setResumeFile}
+          resumeFileName={resumeFileName}
+          setResumeFileName={setResumeFileName}
+          resumeUrl={resumeUrl}
+          setResumeUrl={setResumeUrl}
+          session={session}
+          saveResumeToSettings={saveResumeToSettings} // Add this line
         />
 
         {/* Email generation */}
@@ -488,7 +451,11 @@ function App() {
         {/* Email preview and sending */}
         {emails.length > 0 && (
           <>
-            <EmailPreviewSection emails={emails} onUpdate={handleUpdateEmail} />
+            <EmailPreviewSection
+              emails={emails}
+              onUpdate={handleUpdateEmail}
+              onDiscard={handleDiscardEmail}
+            />
             <SendButton
               count={emails.filter((e) => !e.discarded).length}
               onClick={handleSendEmail}
