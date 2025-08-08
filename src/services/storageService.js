@@ -78,4 +78,36 @@ export const storageService = {
 
     return data;
   },
+
+  /**
+   * Check if a file exists in storage by trying to access it
+   */
+  checkFileExists: async (fileUrl) => {
+    try {
+      if (!fileUrl) return false;
+
+      // Try to fetch the file to see if it exists
+      const response = await fetch(fileUrl, { method: "HEAD" });
+      return response.ok;
+    } catch (error) {
+      console.log("File check failed:", error);
+      return false;
+    }
+  },
+
+  /**
+   * Clear resume from user settings
+   */
+  clearResumeFromSettings: async (userId) => {
+    const { error } = await supabase
+      .from("user_settings")
+      .update({
+        resume_url: null,
+        resume_filename: null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("user_id", userId);
+
+    if (error) throw error;
+  },
 };

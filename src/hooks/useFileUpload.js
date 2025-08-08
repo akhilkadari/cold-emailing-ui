@@ -21,9 +21,18 @@ export const useFileUpload = (session) => {
   const loadUserSettings = async () => {
     try {
       const settings = await storageService.loadUserSettings(session.user.id);
-      if (settings) {
-        setResumeUrl(settings.resume_url || "");
-        setResumeFileName(settings.resume_filename || "");
+      if (settings && settings.resume_url && settings.resume_filename) {
+        // Check if the file actually exists in storage before showing it
+        const fileExists = await storageService.checkFileExists(
+          settings.resume_url
+        );
+        if (fileExists) {
+          setResumeUrl(settings.resume_url);
+          setResumeFileName(settings.resume_filename);
+        } else {
+          // File doesn't exist in storage, clear the database record
+          await storageService.clearResumeFromSettings(session.user.id);
+        }
       }
     } catch (err) {
       console.error("Error loading user settings:", err);

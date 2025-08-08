@@ -58,7 +58,7 @@ function App() {
               },
             },
           }}
-          providers={["email"]}
+          providers={["email", "google", "azure"]}
         />
       </div>
     );
