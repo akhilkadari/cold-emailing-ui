@@ -10,7 +10,7 @@ import EmailPreviewSection from "./components/EmailPreviewSection";
 import SendButton from "./components/SendButton";
 import Footer from "./components/Footer";
 
-// Import custom hooks
+// Import custom hooks!
 import { useAuth } from "./hooks/useAuth";
 import { useLeads } from "./hooks/useLeads";
 import { useEmails } from "./hooks/useEmails";
