@@ -24,26 +24,6 @@ export const emailService = {
   },
 
   /**
-   * Send emails via n8n workflow
-   */
-  sendEmails: async (emails, userEmail) => {
-    const response = await fetch(
-      "https://akhilkadari.app.n8n.cloud/webhook-test/send-email",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          emails,
-          userEmail,
-        }),
-      }
-    );
-
-    if (!response.ok) throw new Error("Failed to send emails");
-    return response.json();
-  },
-
-  /**
    * Transform n8n response to UI format
    */
   transformEmailResponse: (data) => {

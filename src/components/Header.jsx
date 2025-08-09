@@ -4,7 +4,7 @@ import "./Header.css";
 const Header = ({ isLoggedIn, user, onLogout }) => {
   return (
     <header className="header">
-      <div className="brand">Cold Emailer</div>
+      <div className="brand">Cold Email Generator</div>
       <div className="header-actions">
         {isLoggedIn && user ? (
           <>

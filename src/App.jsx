@@ -7,10 +7,9 @@ import Header from "./components/Header";
 import LeadInputTable from "./components/LeadInputTable";
 import GenerateButton from "./components/GenerateButton";
 import EmailPreviewSection from "./components/EmailPreviewSection";
-import SendButton from "./components/SendButton";
 import Footer from "./components/Footer";
 
-// Import custom hooks!
+// Import custom hooks
 import { useAuth } from "./hooks/useAuth";
 import { useLeads } from "./hooks/useLeads";
 import { useEmails } from "./hooks/useEmails";
@@ -58,7 +57,7 @@ function App() {
               },
             },
           }}
-          providers={["email"]}
+          providers={["email", "google", "azure"]}
         />
       </div>
     );
@@ -112,26 +111,13 @@ function App() {
           error={emails.genError}
         />
 
-        {/* Email preview and sending */}
+        {/* Email preview */}
         {emails.emails.length > 0 && (
-          <>
-            <EmailPreviewSection
-              emails={emails.emails}
-              onUpdate={emails.updateEmail}
-              onDiscard={emails.discardEmail}
-            />
-            <SendButton
-              count={emails.emails.filter((e) => !e.discarded).length}
-              onClick={emails.sendEmails}
-              loading={emails.sendLoading}
-              disabled={
-                emails.emails.filter((e) => !e.discarded).length === 0 ||
-                emails.sendSuccess
-              }
-              error={emails.sendError}
-              success={emails.sendSuccess}
-            />
-          </>
+          <EmailPreviewSection
+            emails={emails.emails}
+            onUpdate={emails.updateEmail}
+            onDiscard={emails.discardEmail}
+          />
         )}
       </main>
 
