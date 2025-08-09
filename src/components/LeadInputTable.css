@@ -64,9 +64,10 @@ th,
 td {
   padding: 0.7rem 1.2rem;
   border-bottom: 1px solid var(--border);
+  vertical-align: top;
 }
 .signature-column {
-  padding: 0.7rem 0rem;
+  padding: 0.7rem 1.2rem;
 }
 th {
   background: var(--surface-light);

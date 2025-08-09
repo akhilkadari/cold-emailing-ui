@@ -6,23 +6,34 @@ import "./LeadInputTable.css";
 // CONSTANTS
 // ============================================================================
 const defaultTemplates = [
-  "Hi {{firstname}}, I came across your profile at {{company}}...",
-
-  "Hello {{firstname}}, I noticed your work at {{job_title}}...",
-
-  `Hello {{firstName}}, 
-  
+  {
+    name: "Short Greeting",
+    content: "Hi {{firstname}}, I came across your profile at {{company}}...",
+  },
+  {
+    name: "Warm Intro",
+    content: "Hello {{firstname}}, I noticed your work at {{job_title}}...",
+  },
+  {
+    name: "Professional Outreach",
+    content: `Hello {{firstName}}, 
+    
 I hope your week is going well! My name is Akhil Kadari, and I am a sophomore at Michigan State University interested in pursuing a career in Software Engineering/Data Science. I recently came across your profile on LinkedIn and found your work at {{company}} to be very interesting. More specifically, I am interested in your contributions as a {{role}} as I have a background in software development and as a data analyst. 
-  
+    
 If you are available, I would appreciate the opportunity to talk about your experience in {{company}} and any general advice you may have. My schedule for this week and next is flexible, so I am happy to work around you when scheduling a 10‑15‑minute call. I have also attached my resume for your reference. Thank you in advance for your time. I look forward to speaking with you. 
-  
+    
 Best regards, 
 Akhil Kadari`,
+  },
 ];
 
 const defaultEmailSignatures = [
-  "Best regards,\nAkhil Kadari\nMichigan State University\nCollege of Engineering\nLinkedIn | +1 (248) 590-1059",
-  "Best, \n Akhil Kadari",
+  {
+    name: "Full Signature",
+    content:
+      "Best regards,\nAkhil Kadari\nMichigan State University\nCollege of Engineering\nLinkedIn | +1 (248) 590-1059",
+  },
+  { name: "Short Signature", content: "Best, \n Akhil Kadari" },
 ];
 
 // ============================================================================
@@ -54,6 +65,14 @@ const LeadInputTable = ({
     isOpen: false,
     type: null, // 'template' or 'signature'
     leadIndex: null,
+    name: "",
+    content: "",
+  });
+
+  const [previewState, setPreviewState] = useState({
+    isOpen: false,
+    type: null, // 'template' or 'signature'
+    name: "",
     content: "",
   });
 
@@ -80,6 +99,7 @@ const LeadInputTable = ({
         isOpen: true,
         type: field === "template" ? "template" : "signature",
         leadIndex: idx,
+        name: "",
         content: "",
       });
     } else {
@@ -95,10 +115,22 @@ const LeadInputTable = ({
   };
 
   /**
+   * Handle modal name change
+   */
+  const handleModalNameChange = (name) => {
+    setModalState((prev) => ({ ...prev, name }));
+  };
+
+  /**
    * Save custom template/signature
    */
   const saveCustomContent = () => {
-    const { type, leadIndex, content } = modalState;
+    const { type, leadIndex, name, content } = modalState;
+
+    if (!name.trim()) {
+      alert("Please enter a name before saving.");
+      return;
+    }
 
     if (!content.trim()) {
       alert("Please enter some content before saving.");
@@ -106,11 +138,17 @@ const LeadInputTable = ({
     }
 
     if (type === "template") {
-      const newCustomTemplates = [...customTemplates, content];
+      const newCustomTemplates = [
+        ...customTemplates,
+        { name: name.trim(), content },
+      ];
       setCustomTemplates(newCustomTemplates);
       handleChange(leadIndex, "template", content);
     } else {
-      const newCustomSignatures = [...customSignatures, content];
+      const newCustomSignatures = [
+        ...customSignatures,
+        { name: name.trim(), content },
+      ];
       setCustomSignatures(newCustomSignatures);
       handleChange(leadIndex, "emailSignature", content);
     }
@@ -120,6 +158,7 @@ const LeadInputTable = ({
       isOpen: false,
       type: null,
       leadIndex: null,
+      name: "",
       content: "",
     });
   };
@@ -132,8 +171,13 @@ const LeadInputTable = ({
       isOpen: false,
       type: null,
       leadIndex: null,
+      name: "",
       content: "",
     });
+  };
+
+  const closePreview = () => {
+    setPreviewState({ isOpen: false, type: null, name: "", content: "" });
   };
 
   /**
@@ -145,8 +189,8 @@ const LeadInputTable = ({
       firstname: "",
       lastname: "",
       linkedin: "",
-      template: "", // Default to empty
-      emailSignature: "",
+      template: "", // stores content
+      emailSignature: "", // stores content
     };
     setLeads([...leads, newLead]);
   };
@@ -255,14 +299,56 @@ const LeadInputTable = ({
   );
 
   /**
-   * Get all available templates (default + custom)
+   * Normalize provided templates/signatures to objects with { name, content }
    */
-  const getAllTemplates = () => [...templates, ...customTemplates];
+  const normalizeItems = (items, labelPrefix) =>
+    items.map((item, idx) =>
+      typeof item === "string"
+        ? { name: `${labelPrefix} ${idx + 1}`, content: item }
+        : item
+    );
 
   /**
-   * Get all available signatures (default + custom)
+   * Get all available templates (default + custom) as objects
    */
-  const getAllSignatures = () => [...emailSignatures, ...customSignatures];
+  const getAllTemplates = () => [
+    ...normalizeItems(templates, "Template"),
+    ...customTemplates,
+  ];
+
+  /**
+   * Get all available signatures (default + custom) as objects
+   */
+  const getAllSignatures = () => [
+    ...normalizeItems(emailSignatures, "Signature"),
+    ...customSignatures,
+  ];
+
+  const openPreviewForTemplate = (content) => {
+    if (!content) return;
+    const item = getAllTemplates().find((t) => t.content === content);
+    if (item) {
+      setPreviewState({
+        isOpen: true,
+        type: "template",
+        name: item.name,
+        content: item.content,
+      });
+    }
+  };
+
+  const openPreviewForSignature = (content) => {
+    if (!content) return;
+    const item = getAllSignatures().find((s) => s.content === content);
+    if (item) {
+      setPreviewState({
+        isOpen: true,
+        type: "signature",
+        name: item.name,
+        content: item.content,
+      });
+    }
+  };
 
   // ============================================================================
   // RENDER
@@ -415,12 +501,21 @@ const LeadInputTable = ({
                 >
                   <option value="">Select a template...</option>
                   {getAllTemplates().map((tpl, i) => (
-                    <option key={i} value={tpl}>
-                      {tpl.slice(0, 50)}...
+                    <option key={i} value={tpl.content}>
+                      {tpl.name}
                     </option>
                   ))}
                   <option value="CUSTOM">+ Create Custom Template</option>
                 </select>
+                <div>
+                  <button
+                    onClick={() => openPreviewForTemplate(lead.template)}
+                    disabled={!lead.template}
+                    style={{ marginTop: 6 }}
+                  >
+                    Preview
+                  </button>
+                </div>
               </td>
 
               {/* Email signature selection */}
@@ -439,12 +534,21 @@ const LeadInputTable = ({
                 >
                   <option value="">Select a signature...</option>
                   {getAllSignatures().map((sig, i) => (
-                    <option key={i} value={sig}>
-                      {sig.slice(0, 50)}...
+                    <option key={i} value={sig.content}>
+                      {sig.name}
                     </option>
                   ))}
                   <option value="CUSTOM">+ Create Custom Signature</option>
                 </select>
+                <div>
+                  <button
+                    onClick={() => openPreviewForSignature(lead.emailSignature)}
+                    disabled={!lead.emailSignature}
+                    style={{ marginTop: 6 }}
+                  >
+                    Preview
+                  </button>
+                </div>
               </td>
 
               {/* Remove button */}
@@ -491,13 +595,19 @@ const LeadInputTable = ({
               </button>
             </div>
             <div className="modal-body">
+              <input
+                value={modalState.name}
+                onChange={(e) => handleModalNameChange(e.target.value)}
+                placeholder="Enter a short name"
+                style={{ marginBottom: 12 }}
+              />
               <textarea
                 value={modalState.content}
                 onChange={(e) => handleModalContentChange(e.target.value)}
                 placeholder={
                   modalState.type === "template"
-                    ? "Enter your custom email template here. You can use placeholders like {{firstname}}, {{lastname}}, {{company}}, etc."
-                    : "Enter your custom email signature here."
+                    ? "Enter your custom email template content here. You can use placeholders like {{firstname}}, {{lastname}}, {{company}}, etc."
+                    : "Enter your custom email signature content here."
                 }
                 rows={10}
                 autoFocus
@@ -521,6 +631,36 @@ const LeadInputTable = ({
               </button>
               <button onClick={saveCustomContent} className="btn-primary">
                 Save {modalState.type === "template" ? "Template" : "Signature"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {previewState.isOpen && (
+        <div className="modal-overlay" onClick={closePreview}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>
+                {previewState.type === "template"
+                  ? "Template Preview"
+                  : "Signature Preview"}
+                {previewState.name ? `: ${previewState.name}` : ""}
+              </h3>
+              <button className="modal-close" onClick={closePreview}>
+                ×
+              </button>
+            </div>
+            <div className="modal-body" style={{ textAlign: "left" }}>
+              <pre
+                style={{ whiteSpace: "pre-wrap", textAlign: "left", margin: 0 }}
+              >
+                {previewState.content}
+              </pre>
+            </div>
+            <div className="modal-footer">
+              <button onClick={closePreview} className="btn-primary">
+                Close
               </button>
             </div>
           </div>
