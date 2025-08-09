@@ -13,7 +13,6 @@ import Footer from "./components/Footer";
 import { useAuth } from "./hooks/useAuth";
 import { useLeads } from "./hooks/useLeads";
 import { useEmails } from "./hooks/useEmails";
-import { useFileUpload } from "./hooks/useFileUpload";
 
 function App() {
   // ============================================================================
@@ -22,7 +21,6 @@ function App() {
   const auth = useAuth();
   const leads = useLeads(auth.session);
   const emails = useEmails(auth.session);
-  const fileUpload = useFileUpload(auth.session);
 
   // ============================================================================
   // EVENT HANDLERS
@@ -31,7 +29,6 @@ function App() {
     await auth.logout();
     leads.resetLeads();
     emails.resetEmails();
-    fileUpload.clearResume();
   };
 
   // ============================================================================
@@ -90,23 +87,11 @@ function App() {
           saveLeads={leads.saveLeads}
           deleteLead={leads.deleteLead}
           loading={leads.loading}
-          resumeFile={fileUpload.resumeFile}
-          setResumeFile={fileUpload.setResumeFile}
-          resumeFileName={fileUpload.resumeFileName}
-          setResumeFileName={fileUpload.setResumeFileName}
-          resumeUrl={fileUpload.resumeUrl}
-          setResumeUrl={fileUpload.setResumeUrl}
-          session={auth.session}
-          saveResumeToSettings={fileUpload.uploadResume}
-          uploadLoading={fileUpload.uploadLoading}
-          uploadError={fileUpload.uploadError}
         />
 
         {/* Email generation */}
         <GenerateButton
-          onClick={() =>
-            emails.generateEmails(leads.leads, fileUpload.resumeUrl)
-          }
+          onClick={() => emails.generateEmails(leads.leads)}
           loading={emails.genLoading}
           error={emails.genError}
         />

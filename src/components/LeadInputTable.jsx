@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { supabase } from "../supabaseClient"; // Add this import
 import "./LeadInputTable.css";
 
 // ============================================================================
@@ -47,14 +46,6 @@ const LeadInputTable = ({
   saveLeads,
   deleteLead,
   loading = false,
-  resumeFile,
-  setResumeFile,
-  resumeFileName,
-  setResumeFileName,
-  resumeUrl,
-  setResumeUrl,
-  session,
-  saveResumeToSettings, // Add this prop
 }) => {
   // ============================================================================
   // STATE
@@ -74,6 +65,8 @@ const LeadInputTable = ({
     type: null, // 'template' or 'signature'
     name: "",
     content: "",
+    leadIndex: null,
+    isEditing: false,
   });
 
   // ============================================================================
@@ -177,12 +170,19 @@ const LeadInputTable = ({
   };
 
   const closePreview = () => {
-    setPreviewState({ isOpen: false, type: null, name: "", content: "" });
+    setPreviewState({
+      isOpen: false,
+      type: null,
+      name: "",
+      content: "",
+      leadIndex: null,
+      isEditing: false,
+    });
   };
 
-  /**
-   * Add a new empty lead row
-   */
+  // ============================================================================
+  // ROW OPS
+  // ============================================================================
   const addRow = () => {
     const newLead = {
       email: "",
@@ -195,16 +195,12 @@ const LeadInputTable = ({
     setLeads([...leads, newLead]);
   };
 
-  /**
-   * Remove a lead row (delete from Supabase if it has an ID)
-   * If only one row remains, clear it instead of removing it
-   */
   const removeRow = async (idx) => {
     const leadToRemove = leads[idx];
 
     // If there's only one row, clear it instead of removing
     if (leads.length === 1) {
-      // If lead has an ID, delete from Supabase
+      // If lead has an ID, delete
       if (leadToRemove.id) {
         await deleteLead(leadToRemove.id);
       }
@@ -222,72 +218,21 @@ const LeadInputTable = ({
       ]);
     } else {
       // Multiple rows exist, remove normally
-
-      // If lead has an ID, delete from Supabase
       if (leadToRemove.id) {
         await deleteLead(leadToRemove.id);
       }
-
-      // Remove the lead from local state
       const updatedLeads = leads.filter((_, i) => i !== idx);
       setLeads(updatedLeads);
     }
   };
 
-  /**
-   * Save all leads to Supabase
-   */
   const handleSave = async () => {
     await saveLeads();
   };
 
-  /**
-   * Handle Resume file upload
-   */
-  const handleFileUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    try {
-      // Use the original filename instead of generating a unique one
-      const filePath = `${session?.user?.id}/${file.name}`;
-
-      // Upload to Supabase Storage
-      const { data: uploadData, error: uploadError } = await supabase.storage // Fix variable naming
-        .from("resumes")
-        .upload(filePath, file);
-
-      if (uploadError) throw uploadError;
-
-      // Get public URL
-      const {
-        data: { publicUrl },
-      } = supabase.storage // Fix this line
-        .from("resumes")
-        .getPublicUrl(filePath);
-
-      // Update local state
-      setResumeFile(file);
-      setResumeFileName(file.name);
-      setResumeUrl(publicUrl);
-
-      // Save to database
-      await saveResumeToSettings(publicUrl, file.name);
-
-      // Clear the input
-      e.target.value = "";
-    } catch (error) {
-      console.error("Error uploading resume:", error);
-      alert("Failed to upload resume. Please try again.");
-    }
-  };
-
   // ============================================================================
-  // UTILITY FUNCTIONS
+  // SELECT OPTIONS
   // ============================================================================
-  /**
-   * Check if any lead has content (for save button state)
-   */
   const hasContent = leads.some(
     (lead) =>
       lead.email ||
@@ -298,9 +243,6 @@ const LeadInputTable = ({
       lead.emailSignature
   );
 
-  /**
-   * Normalize provided templates/signatures to objects with { name, content }
-   */
   const normalizeItems = (items, labelPrefix) =>
     items.map((item, idx) =>
       typeof item === "string"
@@ -308,23 +250,17 @@ const LeadInputTable = ({
         : item
     );
 
-  /**
-   * Get all available templates (default + custom) as objects
-   */
   const getAllTemplates = () => [
     ...normalizeItems(templates, "Template"),
     ...customTemplates,
   ];
 
-  /**
-   * Get all available signatures (default + custom) as objects
-   */
   const getAllSignatures = () => [
     ...normalizeItems(emailSignatures, "Signature"),
     ...customSignatures,
   ];
 
-  const openPreviewForTemplate = (content) => {
+  const openPreviewForTemplate = (content, rowIndex) => {
     if (!content) return;
     const item = getAllTemplates().find((t) => t.content === content);
     if (item) {
@@ -333,11 +269,13 @@ const LeadInputTable = ({
         type: "template",
         name: item.name,
         content: item.content,
+        leadIndex: rowIndex,
+        isEditing: false,
       });
     }
   };
 
-  const openPreviewForSignature = (content) => {
+  const openPreviewForSignature = (content, rowIndex) => {
     if (!content) return;
     const item = getAllSignatures().find((s) => s.content === content);
     if (item) {
@@ -346,8 +284,28 @@ const LeadInputTable = ({
         type: "signature",
         name: item.name,
         content: item.content,
+        leadIndex: rowIndex,
+        isEditing: false,
       });
     }
+  };
+
+  const startEditingPreview = () => {
+    setPreviewState((prev) => ({ ...prev, isEditing: true }));
+  };
+  const cancelEditingPreview = () => {
+    setPreviewState((prev) => ({ ...prev, isEditing: false }));
+  };
+  const applyPreviewEdits = () => {
+    const field =
+      previewState.type === "template" ? "template" : "emailSignature";
+    if (previewState.leadIndex != null) {
+      handleChange(previewState.leadIndex, field, previewState.content);
+    }
+    closePreview();
+  };
+  const handlePreviewContentChange = (value) => {
+    setPreviewState((prev) => ({ ...prev, content: value }));
   };
 
   // ============================================================================
@@ -360,67 +318,7 @@ const LeadInputTable = ({
         <button onClick={addRow} disabled={loading}>
           Add Row
         </button>
-        <div className="file-upload">
-          <input
-            id="resume-upload"
-            type="file"
-            accept=".pdf"
-            onChange={handleFileUpload}
-            disabled={loading}
-          />
-          <label htmlFor="resume-upload" className="file-upload-label">
-            Add Resume File
-          </label>
-        </div>
       </div>
-
-      {/* Resume file display */}
-      {resumeFileName && (
-        <div className="resume-display-section">
-          <div className="resume-file-info">
-            <span className="resume-icon">📄</span>
-            <span className="resume-name">{resumeFileName}</span>
-            <button
-              className="remove-resume-btn"
-              onClick={async () => {
-                try {
-                  const response = await fetch(
-                    "https://akhilkadari.app.n8n.cloud/webhook/delete-resume",
-                    {
-                      method: "POST",
-                      headers: {
-                        "Content-Type": "application/json",
-                      },
-                      body: JSON.stringify({
-                        resumeUrl,
-                      }),
-                    }
-                  );
-
-                  if (!response.ok) {
-                    throw new Error("Failed to delete resume");
-                  }
-                  const result = await response.json();
-
-                  // Clear from database
-                  await saveResumeToSettings("", "");
-
-                  // Clear local state
-                  setResumeFile(null);
-                  setResumeFileName("");
-                  setResumeUrl("");
-                } catch (error) {
-                  console.error("Error deleting resume:", error);
-                  alert("Failed to delete resume. Please try again.");
-                }
-              }}
-              disabled={loading}
-            >
-              ×
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Loading indicator */}
       {loading && <div className="loading-indicator">Loading leads...</div>}
@@ -499,7 +397,9 @@ const LeadInputTable = ({
                   }
                   disabled={loading}
                 >
-                  <option value="">Select a template...</option>
+                  <option value="" disabled>
+                    Select a template...
+                  </option>
                   {getAllTemplates().map((tpl, i) => (
                     <option key={i} value={tpl.content}>
                       {tpl.name}
@@ -507,15 +407,16 @@ const LeadInputTable = ({
                   ))}
                   <option value="CUSTOM">+ Create Custom Template</option>
                 </select>
-                <div>
-                  <button
-                    onClick={() => openPreviewForTemplate(lead.template)}
-                    disabled={!lead.template}
-                    style={{ marginTop: 6 }}
-                  >
-                    Preview
-                  </button>
-                </div>
+                {lead.template && (
+                  <div>
+                    <button
+                      onClick={() => openPreviewForTemplate(lead.template, idx)}
+                      style={{ marginTop: 6 }}
+                    >
+                      Preview
+                    </button>
+                  </div>
+                )}
               </td>
 
               {/* Email signature selection */}
@@ -532,7 +433,9 @@ const LeadInputTable = ({
                   }
                   disabled={loading}
                 >
-                  <option value="">Select a signature...</option>
+                  <option value="" disabled>
+                    Select a signature...
+                  </option>
                   {getAllSignatures().map((sig, i) => (
                     <option key={i} value={sig.content}>
                       {sig.name}
@@ -540,15 +443,18 @@ const LeadInputTable = ({
                   ))}
                   <option value="CUSTOM">+ Create Custom Signature</option>
                 </select>
-                <div>
-                  <button
-                    onClick={() => openPreviewForSignature(lead.emailSignature)}
-                    disabled={!lead.emailSignature}
-                    style={{ marginTop: 6 }}
-                  >
-                    Preview
-                  </button>
-                </div>
+                {lead.emailSignature && (
+                  <div>
+                    <button
+                      onClick={() =>
+                        openPreviewForSignature(lead.emailSignature, idx)
+                      }
+                      style={{ marginTop: 6 }}
+                    >
+                      Preview
+                    </button>
+                  </div>
+                )}
               </td>
 
               {/* Remove button */}
@@ -652,16 +558,48 @@ const LeadInputTable = ({
               </button>
             </div>
             <div className="modal-body" style={{ textAlign: "left" }}>
-              <pre
-                style={{ whiteSpace: "pre-wrap", textAlign: "left", margin: 0 }}
-              >
-                {previewState.content}
-              </pre>
+              {previewState.isEditing ? (
+                <textarea
+                  value={previewState.content}
+                  onChange={(e) => handlePreviewContentChange(e.target.value)}
+                  rows={12}
+                />
+              ) : (
+                <pre
+                  style={{
+                    whiteSpace: "pre-wrap",
+                    textAlign: "left",
+                    margin: 0,
+                  }}
+                >
+                  {previewState.content}
+                </pre>
+              )}
             </div>
             <div className="modal-footer">
-              <button onClick={closePreview} className="btn-primary">
-                Close
-              </button>
+              {!previewState.isEditing && (
+                <button onClick={startEditingPreview} className="btn-secondary">
+                  Edit
+                </button>
+              )}
+              {previewState.isEditing && (
+                <>
+                  <button
+                    onClick={cancelEditingPreview}
+                    className="btn-secondary"
+                  >
+                    Cancel
+                  </button>
+                  <button onClick={applyPreviewEdits} className="btn-primary">
+                    Apply
+                  </button>
+                </>
+              )}
+              {!previewState.isEditing && (
+                <button onClick={closePreview} className="btn-primary">
+                  Close
+                </button>
+              )}
             </div>
           </div>
         </div>
