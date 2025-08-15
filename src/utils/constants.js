@@ -23,3 +23,12 @@ export const hasLeadData = (lead) => {
     lead.emailSignature
   );
 };
+
+export const hasConnectionData = (connection) => {
+  return (
+    connection.numberOfEmployees ||
+    connection.companyName ||
+    connection.school ||
+    connection.jobTitle
+  );
+};

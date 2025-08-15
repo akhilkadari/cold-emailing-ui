@@ -1,0 +1,168 @@
+/* Prospect Preview Card */
+.prospect-preview-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.prospect-preview-card:hover {
+  border-color: var(--input-border);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.prospect-preview-card.discarded {
+  opacity: 0.6;
+  background: var(--surface-light);
+}
+
+.prospect-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+  gap: 1rem;
+}
+
+.prospect-info {
+  flex: 1;
+  min-width: 0; /* Allow flex item to shrink */
+}
+
+.prospect-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.4rem;
+  word-wrap: break-word;
+}
+
+.prospect-profile-link {
+  color: var(--primary);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: color 0.2s;
+  word-break: break-all;
+}
+
+.prospect-profile-link:hover {
+  color: var(--primary-light);
+  text-decoration: underline;
+}
+
+.discard-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.discard-toggle input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+}
+
+.discard-label {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.prospect-fields {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 1.2rem;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0; /* Allow container to shrink */
+}
+
+.field-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.field-group input {
+  width: 100%;
+  max-width: 100%;
+  padding: 0.6rem 0.8rem;
+  border: 1.5px solid var(--input-border);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  background: var(--input-bg);
+  color: var(--text);
+  transition: border 0.2s, box-shadow 0.2s;
+  outline: none;
+  box-sizing: border-box;
+  min-width: 0; /* Allow input to shrink */
+}
+
+.field-group input:focus {
+  border-color: var(--input-focus);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
+}
+
+.field-group input:disabled {
+  background: var(--surface-light);
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+.prospect-actions {
+  display: flex;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.prospect-actions button {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);
+  flex: 1;
+  min-width: 0;
+}
+
+.prospect-actions button:hover {
+  background: var(--primary-light);
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.25);
+}
+
+.prospect-actions button:disabled {
+  background: var(--border);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.prospect-actions .cancel-btn {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  box-shadow: none;
+}
+
+.prospect-actions .cancel-btn:hover {
+  background: var(--surface-light);
+  border-color: var(--input-border);
+}

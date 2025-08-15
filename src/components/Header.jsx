@@ -1,5 +1,6 @@
 import React from "react";
 import "./Header.css";
+import { Link } from "react-router-dom";
 
 const Header = ({ isLoggedIn, user, onLogout }) => {
   return (
@@ -8,6 +9,10 @@ const Header = ({ isLoggedIn, user, onLogout }) => {
       <div className="header-actions">
         {isLoggedIn && user ? (
           <>
+            <Link className="logout-btn" to="/chat">
+              Find Connections
+            </Link>
+
             <span className="user-profile">{user.email}</span>
             <button className="logout-btn" onClick={onLogout}>
               Logout

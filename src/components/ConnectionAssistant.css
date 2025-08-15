@@ -1,0 +1,180 @@
+/* Layout wrapper */
+.connection-assistant {
+  width: 100%;
+}
+
+/* Card container */
+.connection-card {
+  background: var(--card-bg);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  margin: 2rem auto;
+  padding: 1.25rem 1.25rem 1rem 1.25rem;
+  max-width: 1400px;
+}
+
+/* Card header with actions */
+.connection-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.25rem 0.25rem 1rem 0.25rem;
+}
+.connection-card__header h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  color: var(--text);
+}
+.connection-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+/* Buttons */
+.btn {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 0.45rem 0.9rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: background 0.2s, box-shadow 0.2s, border 0.2s;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+.btn:hover {
+  background: var(--surface-light);
+}
+.btn-primary {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.18);
+}
+.btn-primary:hover {
+  background: var(--primary-light);
+}
+.btn-danger {
+  background: var(--danger);
+  color: #fff;
+  border: none;
+  box-shadow: none;
+}
+.btn-danger:hover {
+  background: #dc2626;
+}
+
+/* Error banner */
+.error-banner {
+  background: #2d1b1b;
+  color: #fca5a5;
+  border: 1px solid #7f1d1d;
+  padding: 0.8rem 1rem;
+  border-radius: 8px;
+  margin: 0 0.25rem 1rem 0.25rem;
+}
+
+/* Table wrapper for overflow */
+.table-wrapper {
+  overflow-x: auto;
+}
+
+/* Table */
+.connection-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.connection-table thead th {
+  background: var(--surface-light);
+  color: var(--primary-light);
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 0.6rem 0.9rem;
+}
+.connection-table tbody td {
+  padding: 0.6rem 0.9rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+/* Inputs */
+.connection-table input[type="text"],
+.connection-table input[type="number"],
+.connection-table select {
+  width: 100%;
+  padding: 0.45rem 0.6rem;
+  border: 1.5px solid var(--input-border);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  background: var(--input-bg);
+  color: var(--text);
+  outline: none;
+  transition: border 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+}
+.connection-table input:focus,
+.connection-table select:focus {
+  border-color: var(--input-focus);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
+}
+
+/* Right align numeric */
+.connection-table input[name="numberOfEmployees"] {
+  text-align: right;
+}
+
+/* Actions col */
+.actions-col {
+  width: 1%;
+  white-space: nowrap;
+}
+
+/* Generate button wrapper */
+.generate-btn-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 1.5rem 0 0.5rem 0;
+  border-top: 1px solid var(--border);
+  margin-top: 1rem;
+}
+
+.generate-btn {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  padding: 0.6rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.18);
+}
+
+.generate-btn:hover {
+  background: var(--primary-light);
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.25);
+}
+
+.generate-btn:disabled {
+  background: var(--border);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.error-msg {
+  background: #2d1b1b;
+  color: #fca5a5;
+  border: 1px solid #7f1d1d;
+  padding: 0.6rem 1rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  text-align: center;
+}

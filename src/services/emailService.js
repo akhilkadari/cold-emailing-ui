@@ -7,7 +7,7 @@ export const emailService = {
    */
   generateEmails: async (leads, userEmail, resumeUrl) => {
     const response = await fetch(
-      "https://akhilkadari.app.n8n.cloud/webhook/generate-emails",
+      "https://akhilkadari.app.n8n.cloud/webhook-test/generate-emails",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
