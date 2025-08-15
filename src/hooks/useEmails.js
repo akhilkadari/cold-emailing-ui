@@ -20,7 +20,7 @@ export const useEmails = (session) => {
         resumeUrl
       );
 
-      const mappedEmails = emailService.transformEmailResponse(data);
+      const mappedEmails = emailService.transformEmailResponse(data, leads);
       setEmails(mappedEmails);
     } catch (err) {
       setGenError(err.message || "Failed to generate emails.");

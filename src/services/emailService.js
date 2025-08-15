@@ -1,3 +1,5 @@
+import { generateSubjectFromTemplate, replaceTemplatePlaceholders } from "../utils/templateUtils";
+
 /**
  * Email service - handles all n8n API operations
  */
@@ -24,9 +26,9 @@ export const emailService = {
   },
 
   /**
-   * Transform n8n response to UI format
+   * Transform n8n response to UI format and add template-based subjects
    */
-  transformEmailResponse: (data) => {
+  transformEmailResponse: (data, leads) => {
     // Handle object response format
     let emailsArray;
     if (Array.isArray(data)) {
@@ -40,7 +42,23 @@ export const emailService = {
     }
 
     // Map the n8n response format to your UI format
-    return emailsArray.map((emailData) => {
+    return emailsArray.map((emailData, index) => {
+      // Find the corresponding lead to get template information
+      const lead = leads && leads[index] ? leads[index] : null;
+      
+      // Generate subject based on template if available
+      let subject = emailData.subject || "";
+      if (lead && lead.template && !subject) {
+        subject = generateSubjectFromTemplate(lead.template);
+      }
+      
+      // Use template content for email body if available, otherwise fall back to API response
+      let body = emailData.body || emailData.content || "";
+      if (lead && lead.template) {
+        // Replace placeholders in the template with actual lead data
+        body = replaceTemplatePlaceholders(lead.template, lead);
+      }
+      
       return {
         email: emailData.emailId || emailData.recipient_email || "",
         firstname:
@@ -50,8 +68,8 @@ export const emailService = {
           "",
         lastname:
           emailData.lastName || emailData.lastname || emailData.last_name || "",
-        subject: emailData.subject || "",
-        body: emailData.body || emailData.content || "",
+        subject: subject,
+        body: body,
         signature: emailData.signature || "",
         discarded: false,
       };
