@@ -11,7 +11,7 @@ function App() {
         <Route path="/chat" element={<ConnectionAssistant />} />
       </Routes>
 
-      <Footer />
+      {/* <Footer /> */}
     </div>
   );
 }

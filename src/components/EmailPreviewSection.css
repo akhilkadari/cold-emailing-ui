@@ -1,73 +1,177 @@
 .email-preview-section {
-  margin: 2.5rem 0;
-  padding: 2.5rem;
-  background: var(--surface-light);
-  border-radius: 16px;
+  margin: var(--spacing-2xl) 0;
+  padding: var(--spacing-2xl);
+  background: var(--gradient-surface);
+  border-radius: var(--radius-xl);
   animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-xl);
   border: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
 }
+
+.email-preview-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--gradient-primary);
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(32px);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
+
 .email-preview-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
+  margin-bottom: var(--spacing-2xl);
+  padding-bottom: var(--spacing-lg);
   border-bottom: 2px solid var(--border);
+  gap: var(--spacing-lg);
 }
+
 .email-preview-title {
   color: var(--primary-light);
   font-weight: 700;
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
 }
+
+.email-preview-title::before {
+  content: "📧";
+  font-size: 1.6rem;
+}
+
 .email-count-badge {
-  background: var(--primary);
-  color: #fff;
-  padding: 0.4rem 1rem;
-  border-radius: 20px;
+  background: var(--gradient-primary);
+  color: white;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--radius-xl);
   font-size: 0.9rem;
   font-weight: 600;
+  box-shadow: var(--shadow-md);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
+
 .email-preview-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
-  gap: 2rem;
-  margin-top: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: var(--spacing-xl);
+  margin-top: var(--spacing-xl);
 }
 
 .preview-actions {
   display: flex;
-  gap: 1rem;
-  margin-top: 1.5rem;
-  padding-top: 1.5rem;
+  gap: var(--spacing-lg);
+  margin-top: var(--spacing-xl);
+  padding-top: var(--spacing-xl);
   border-top: 1px solid var(--border);
+  flex-wrap: wrap;
 }
+
 .select-all-btn,
 .deselect-all-btn {
-  background: var(--secondary);
-  color: var(--primary-bg);
+  background: var(--gradient-accent);
+  color: white;
   border: none;
-  padding: 0.6rem 1.4rem;
-  border-radius: 8px;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--radius-md);
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 0.95rem;
   cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 2px 8px rgba(251, 191, 36, 0.15);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-md);
+  position: relative;
+  overflow: hidden;
 }
+
+.select-all-btn::before,
+.deselect-all-btn::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.5s;
+}
+
 .select-all-btn:hover,
 .deselect-all-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(251, 191, 36, 0.25);
+  box-shadow: var(--shadow-lg);
+}
+
+.select-all-btn:hover::before,
+.deselect-all-btn:hover::before {
+  left: 100%;
+}
+
+.select-all-btn:active,
+.deselect-all-btn:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+
+.deselect-all-btn {
+  background: var(--surface-light);
+  color: var(--text);
+  border: 2px solid var(--border);
+}
+
+.deselect-all-btn:hover {
+  background: var(--surface-lighter);
+  border-color: var(--border-light);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .email-preview-section {
+    margin: var(--spacing-lg) 0;
+    padding: var(--spacing-lg);
+  }
+
+  .email-preview-list {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-lg);
+  }
+
+  .email-preview-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-md);
+  }
+
+  .email-preview-title {
+    font-size: 1.5rem;
+    text-align: center;
+  }
+
+  .email-count-badge {
+    align-self: center;
+  }
+
+  .preview-actions {
+    flex-direction: column;
+  }
 }

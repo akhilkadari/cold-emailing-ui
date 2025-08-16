@@ -1,11 +1,15 @@
 import React from "react";
 import "./Header.css";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Header = ({ isLoggedIn, user, onLogout }) => {
+  const navigate = useNavigate();
+
   return (
     <header className="header">
-      <div className="brand">Cold Email Generator</div>
+      <div className="brand" onClick={() => navigate("/")}>
+        Cold Email Generator
+      </div>
       <div className="header-actions">
         {isLoggedIn && user ? (
           <>
