@@ -26,6 +26,8 @@ export const leadsService = {
         linkedin: lead.linkedin || "",
         template: lead.template || "",
         emailSignature: lead.emailSignature || "",
+        template_id: lead.template_id || null,
+        signature_id: lead.signature_id || null,
       }));
     }
 
@@ -45,6 +47,8 @@ export const leadsService = {
         linkedin: lead.linkedin || null,
         template: lead.template || null,
         emailSignature: lead.emailSignature || null,
+        template_id: lead.template_id || null,
+        signature_id: lead.signature_id || null,
       }))
     );
 
@@ -64,6 +68,8 @@ export const leadsService = {
         linkedin: lead.linkedin || null,
         template: lead.template || null,
         emailSignature: lead.emailSignature || null,
+        template_id: lead.template_id || null,
+        signature_id: lead.signature_id || null,
       })
       .eq("id", lead.id)
       .eq("user_id", userId);

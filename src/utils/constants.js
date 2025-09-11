@@ -8,6 +8,8 @@ export const defaultLead = {
   linkedin: "",
   template: "",
   emailSignature: "",
+  template_id: null,
+  signature_id: null,
 };
 
 /**

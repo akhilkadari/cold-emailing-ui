@@ -9,7 +9,7 @@ export const connectionService = {
    */
   generateConnections: async (connections) => {
     const response = await fetch(
-      "https://akhilkadari.app.n8n.cloud/webhook-test/generate-connections",
+      "https://akhilkadari.app.n8n.cloud/webhook/generate-connections",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },

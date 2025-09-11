@@ -55,9 +55,11 @@ export const emailService = {
         subject = generateSubjectFromTemplate(lead.template);
       }
 
-      // Use template content for email body if available, otherwise fall back to API response
+      // Prioritize n8n webhook response over template
       let body = emailData.body || emailData.content || "";
-      if (lead && lead.template) {
+
+      // Only use template if no content was returned from n8n
+      if (!body && lead && lead.template) {
         // Replace placeholders in the template with actual lead data
         body = replaceTemplatePlaceholders(lead.template, lead);
       }

@@ -36,7 +36,18 @@ function Home() {
   // Show auth screen if not logged in
   if (!auth.session) {
     return (
-      <div style={{ maxWidth: 420, margin: "4rem auto" }}>
+      <div
+        style={{
+          maxWidth: 1000,
+          margin: "4rem",
+          marginTop: "8rem",
+          marginLeft: "29rem",
+          padding: "2rem",
+          backgroundColor: "#1e293b",
+          borderRadius: "12px",
+          boxShadow: "0 10px 25px rgba(0, 0, 0, 0.3)",
+        }}
+      >
         <Auth
           supabaseClient={supabase}
           appearance={{
@@ -49,11 +60,24 @@ function Home() {
                   inputPlaceholder: "#cbd5e1",
                   inputBackground: "#232b3b",
                   inputBorder: "#334155",
+                  messageText: "#fff",
+                  anchorTextColor: "#fff",
                 },
               },
             },
+            style: {
+              button: {
+                color: "#fff",
+              },
+              anchor: {
+                color: "#fff",
+              },
+              message: {
+                color: "#fff",
+              },
+            },
           }}
-          providers={["email", "google", "azure"]}
+          providers={[]}
         />
       </div>
     );
@@ -81,6 +105,7 @@ function Home() {
         <LeadInputTable
           leads={leads.leads}
           setLeads={leads.setLeads}
+          session={auth.session}
           saveLeads={leads.saveLeads}
           deleteLead={leads.deleteLead}
           loading={leads.loading}
